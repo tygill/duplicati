@@ -416,6 +416,7 @@ namespace Duplicati.Library.Backend
                                         else if ((int)ex.Response.StatusCode >= 400 && (int)ex.Response.StatusCode < 500)
                                         {
                                             // If a 4xx error code is hit, we should retry without the backoff attempt
+                                            // TODO: Handle 416 errors specifically.
                                             continue;
                                         }
                                         else
