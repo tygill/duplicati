@@ -274,12 +274,28 @@ namespace Duplicati.CommandLine.BackendTool
                                 bool success = false;
                                 for (int retryCount = 0; retryCount < 3 && !success; retryCount++)
                                 {
+                                    if (retryCount > 0)
+                                    {
+                                        Thread.Sleep((int)Math.Pow(100, retryCount));
+                                    }
+
                                     try
                                     {
                                         Console.WriteLine("{0}/{1} Syncing {2} ({3})", i + 1, copy.Count, file.Name, Utility.FormatSizeString(file.Size));
                                         Console.WriteLine("[{0,-100}] {1:P}", new string('=', (int)(((double)copied / copySize) * 100)), (double)copied / copySize);
                                         syncFile(file);
                                         success = true;
+                                    }
+                                    catch (System.Net.WebException ex)
+                                    {
+                                        string response = null;
+                                        using (Stream responseStream = ex.Response.GetResponseStream())
+                                        using (var reader = new System.IO.StreamReader(responseStream))
+                                        {
+                                            response = reader.ReadToEnd();
+                                        }
+
+                                        Console.WriteLine("Caught WebException '{0}' and retrying:\n{1}\n{2}", ex.Message, ex, response);
                                     }
                                     catch (Exception ex)
                                     {
@@ -303,12 +319,28 @@ namespace Duplicati.CommandLine.BackendTool
                                 bool success = false;
                                 for (int retryCount = 0; retryCount < 3 && !success; retryCount++)
                                 {
+                                    if (retryCount > 0)
+                                    {
+                                        Thread.Sleep((int)Math.Pow(100, retryCount));
+                                    }
+
                                     try
                                     {
                                         Console.WriteLine("{0}/{1} Deleting {2} ({3})", i + 1, delete.Count, file.Name, Utility.FormatSizeString(file.Size));
                                         Console.WriteLine("[{0,-100}] {1:P}", new string('=', (int)(((double)deleted / deleteSize) * 100)), (double)deleted / deleteSize);
                                         secondBackend.Delete(file.Name);
                                         success = true;
+                                    }
+                                    catch (System.Net.WebException ex)
+                                    {
+                                        string response = null;
+                                        using (Stream responseStream = ex.Response.GetResponseStream())
+                                        using (var reader = new System.IO.StreamReader(responseStream))
+                                        {
+                                            response = reader.ReadToEnd();
+                                        }
+
+                                        Console.WriteLine("Caught WebException '{0}' and retrying:\n{1}\n{2}", ex.Message, ex, response);
                                     }
                                     catch (Exception ex)
                                     {
